@@ -17,7 +17,7 @@ DOCKER_CMD=docker run --rm \
 	-v $(PWD)/thirdparty/github.com/mwitkow:/usr/include/github.com/mwitkow:ro \
 	-v $(PWD)/thirdparty/github.com/envoyproxy:/usr/include/github.com/envoyproxy:ro \
 	-v $(PWD)/tmp/googleapis/google/api:/usr/include/google/api:ro \
-	pseudomuto/protoc-gen-doc:latest
+	daotl/protoc-gen-doc:latest
 
 BOLD = \033[1m
 CLEAR = \033[0m
@@ -49,7 +49,7 @@ build/examples: bin/protoc build tmp/googleapis examples/proto/*.proto examples/
 ##@: Dev
 
 dev/docker: bin/protoc tmp/googleapis release/snapshot ## Run bash in the docker container
-	@docker run --rm -it --entrypoint /bin/bash pseudomuto/protoc-gen-doc:latest
+	@docker run --rm -it --entrypoint /bin/bash daotl/protoc-gen-doc:latest
 
 ##@: Test
 

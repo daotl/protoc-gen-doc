@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	gendoc "github.com/pseudomuto/protoc-gen-doc"
+	gendoc "github.com/daotl/protoc-gen-doc"
 )
 
 const helpMessage = `
@@ -24,7 +24,7 @@ protoc --doc_out=. --doc_opt=custom.tmpl,docs.txt protos/*.proto
 EXAMPLE: Generate docs relative to source protos
 protoc --doc_out=. --doc_opt=html,index.html,source_relative protos/*.proto
 
-See https://github.com/pseudomuto/protoc-gen-doc for more details.
+See https://github.com/daotl/protoc-gen-doc for more details.
 `
 
 // Version returns the currently running version of protoc-gen-doc
@@ -83,14 +83,15 @@ func (f *Flags) PrintVersion() {
 // ParseFlags parses the supplied options are returns a `Flags` object to the caller.
 //
 // Parameters:
-//   * `w` - the `io.Writer` to use for printing messages (help, version, etc.)
-//   * `args` - the set of args the program was invoked with (typically `os.Args`)
+//   - `w` - the `io.Writer` to use for printing messages (help, version, etc.)
+//   - `args` - the set of args the program was invoked with (typically `os.Args`)
 func ParseFlags(w io.Writer, args []string) *Flags {
 	f := Flags{appName: args[0], writer: w}
 
 	f.flagSet = flag.NewFlagSet(args[0], flag.ContinueOnError)
 	f.flagSet.BoolVar(&f.showHelp, "help", false, "Show this help message")
-	f.flagSet.BoolVar(&f.showVersion, "version", false, fmt.Sprintf("Print the current version (%v)", Version()))
+	f.flagSet.BoolVar(&f.showVersion, "version", false,
+		fmt.Sprintf("Print the current version (%v)", Version()))
 	f.flagSet.SetOutput(w)
 
 	// prevent showing help on parse error

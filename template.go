@@ -7,8 +7,8 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/daotl/protoc-gen-doc/extensions"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
-	"github.com/pseudomuto/protoc-gen-doc/extensions"
 	"github.com/pseudomuto/protokit"
 )
 
@@ -38,7 +38,8 @@ func NewTemplate(descs []*protokit.FileDescriptor, pluginOptions *PluginOptions)
 			Extensions:    make(orderedExtensions, 0, len(f.Extensions)),
 			Messages:      make(orderedMessages, 0, len(f.Messages)),
 			Services:      make(orderedServices, 0, len(f.Services)),
-			Options:       mergeOptions(extractOptions(f.GetOptions()), extensions.Transform(f.OptionExtensions)),
+			Options: mergeOptions(extractOptions(f.GetOptions()),
+				extensions.Transform(f.OptionExtensions)),
 		}
 
 		for _, e := range f.Enums {
@@ -418,7 +419,8 @@ func parseEnum(pe *protokit.EnumDescriptor) *Enum {
 		LongName:    pe.GetLongName(),
 		FullName:    pe.GetFullName(),
 		Description: description(pe.GetComments().String()),
-		Options:     mergeOptions(extractOptions(pe.GetOptions()), extensions.Transform(pe.OptionExtensions)),
+		Options: mergeOptions(extractOptions(pe.GetOptions()),
+			extensions.Transform(pe.OptionExtensions)),
 	}
 
 	for _, val := range pe.GetValues() {
@@ -426,7 +428,8 @@ func parseEnum(pe *protokit.EnumDescriptor) *Enum {
 			Name:        val.GetName(),
 			Number:      fmt.Sprint(val.GetNumber()),
 			Description: description(val.GetComments().String()),
-			Options:     mergeOptions(extractOptions(val.GetOptions()), extensions.Transform(val.OptionExtensions)),
+			Options: mergeOptions(extractOptions(val.GetOptions()),
+				extensions.Transform(val.OptionExtensions)),
 		})
 	}
 
@@ -464,7 +467,8 @@ func parseMessage(pm *protokit.Descriptor, pluginOptions *PluginOptions) *Messag
 		HasOneofs:     len(pm.GetOneofDecl()) > 0,
 		Extensions:    make([]*MessageExtension, 0, len(pm.Extensions)),
 		Fields:        make([]*MessageField, 0, len(pm.Fields)),
-		Options:       mergeOptions(extractOptions(pm.GetOptions()), extensions.Transform(pm.OptionExtensions)),
+		Options: mergeOptions(extractOptions(pm.GetOptions()),
+			extensions.Transform(pm.OptionExtensions)),
 	}
 
 	for _, ext := range pm.Extensions {
@@ -503,8 +507,9 @@ func parseMessageField(pf *protokit.FieldDescriptor, oneofDecls []*descriptor.On
 		LongType:     lt,
 		FullType:     ft,
 		DefaultValue: pf.GetDefaultValue(),
-		Options:      mergeOptions(extractOptions(pf.GetOptions()), extensions.Transform(pf.OptionExtensions)),
-		IsOneof:      pf.OneofIndex != nil,
+		Options: mergeOptions(extractOptions(pf.GetOptions()),
+			extensions.Transform(pf.OptionExtensions)),
+		IsOneof: pf.OneofIndex != nil,
 	}
 
 	if m.IsOneof {
@@ -531,7 +536,8 @@ func parseService(ps *protokit.ServiceDescriptor) *Service {
 		LongName:    ps.GetLongName(),
 		FullName:    ps.GetFullName(),
 		Description: description(ps.GetComments().String()),
-		Options:     mergeOptions(extractOptions(ps.GetOptions()), extensions.Transform(ps.OptionExtensions)),
+		Options: mergeOptions(extractOptions(ps.GetOptions()),
+			extensions.Transform(ps.OptionExtensions)),
 	}
 
 	for _, sm := range ps.Methods {
@@ -553,7 +559,8 @@ func parseServiceMethod(pm *protokit.MethodDescriptor) *ServiceMethod {
 		ResponseLongType:  strings.TrimPrefix(pm.GetOutputType(), "."+pm.GetPackage()+"."),
 		ResponseFullType:  strings.TrimPrefix(pm.GetOutputType(), "."),
 		ResponseStreaming: pm.GetServerStreaming(),
-		Options:           mergeOptions(extractOptions(pm.GetOptions()), extensions.Transform(pm.OptionExtensions)),
+		Options: mergeOptions(extractOptions(pm.GetOptions()),
+			extensions.Transform(pm.OptionExtensions)),
 	}
 }
 
