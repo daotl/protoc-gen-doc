@@ -110,7 +110,7 @@ OUTER:
 // ParseOptions parses plugin options from a CodeGeneratorRequest. It does this by splitting the `Parameter` field from
 // the request object and parsing out the type of renderer to use and the name of the file to be generated.
 //
-// The parameter (`--doc_opt`) must be of the format <TYPE|TEMPLATE_FILE>,<OUTPUT_FILE>[,default|source_relative]:<EXCLUDE_PATTERN>,<EXCLUDE_PATTERN>*:[,camel_case_fields=[true|false]].
+// The parameter (`--doc_opt`) must be of the format <TYPE|TEMPLATE_FILE>,<OUTPUT_FILE>[,default|source_relative]:<OPTION>,<OPTION>*.
 // The file will be written to the directory specified with the `--doc_out` argument to protoc.
 func ParseOptions(req *plugin_go.CodeGeneratorRequest) (*PluginOptions, error) {
 	options := &PluginOptions{
@@ -121,31 +121,56 @@ func ParseOptions(req *plugin_go.CodeGeneratorRequest) (*PluginOptions, error) {
 		CamelCaseFields: false,
 	}
 
-	params := req.GetParameter()
-	colonParts := strings.Split(params, ":")
-	if len(colonParts) == 3 {
-		additionalOptions := (strings.Split(colonParts[2], "\n"))[0]
-		if additionalOptions == "camel_case_fields=true" {
-			options.CamelCaseFields = true
-		} else if additionalOptions == "camel_case_fields=false" {
-			options.CamelCaseFields = false
-		} else if additionalOptions != "" {
-			return nil, fmt.Errorf("Invalid additional options after second colon separator: %v", additionalOptions)
-		}
-	}
-	if len(colonParts) >= 2 {
-		if colonParts[1] != "" {
-			// Parse out exclude patterns if any
-			for _, pattern := range strings.Split(colonParts[1], ",") {
-				r, err := regexp.Compile(pattern)
+	params := strings.Split(req.GetParameter(), "\n")[0]
+	colonParts := strings.SplitN(params, ":", 2)
+	fileParams := colonParts[0]
+	if len(colonParts) == 2 {
+		optionsPart := colonParts[1]
+		currentOption := ""
+		for _, token := range strings.Split(optionsPart, ",") {
+			token = strings.TrimSpace(token)
+			if token == "" {
+				continue
+			}
+			if strings.Contains(token, "=") {
+				keyValue := strings.SplitN(token, "=", 2)
+				key := keyValue[0]
+				value := keyValue[1]
+				currentOption = key
+				switch key {
+				case "camel_case_fields":
+					switch value {
+					case "true":
+						options.CamelCaseFields = true
+					case "false":
+						options.CamelCaseFields = false
+					default:
+						return nil, fmt.Errorf("Invalid camel_case_fields value: %v", value)
+					}
+				case "exclude_patterns":
+					if value != "" {
+						r, err := regexp.Compile(value)
+						if err != nil {
+							return nil, err
+						}
+						options.ExcludePatterns = append(options.ExcludePatterns, r)
+					}
+				default:
+					return nil, fmt.Errorf("Invalid option: %v", key)
+				}
+				continue
+			}
+			if currentOption == "exclude_patterns" {
+				r, err := regexp.Compile(token)
 				if err != nil {
 					return nil, err
 				}
 				options.ExcludePatterns = append(options.ExcludePatterns, r)
+				continue
 			}
+			return nil, fmt.Errorf("Invalid option: %v", token)
 		}
 	}
-	fileParams := colonParts[0]
 	if fileParams == "" {
 		return options, nil
 	}

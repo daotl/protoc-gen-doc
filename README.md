@@ -29,7 +29,7 @@ example](examples/gradle).
 The plugin is invoked by passing the `--doc_out`, and `--doc_opt` options to the `protoc` compiler. The option has the
 following format:
 
-    --doc_opt=<FORMAT>|<TEMPLATE_FILENAME>,<OUT_FILENAME>[,default|source_relative]
+    --doc_opt=<FORMAT>|<TEMPLATE_FILENAME>,<OUT_FILENAME>[,default|source_relative][:<OPTION>[,<OPTION>...]]
 
 The format may be one of the built-in ones ( `docbook`, `html`, `markdown` or `json`)
 or the name of a file containing a custom [Go template][gotemplate].
@@ -71,14 +71,14 @@ docker run --rm \
   daotl/protoc-gen-doc --doc_opt=markdown,docs.md Booking.proto [OPTIONALLY LIST MORE FILES]
 ```
 
-You can also exclude proto files that match specific path expressions. This is done by passing a second option delimited
-by `:`. For example, you can pass any number of comma separated patterns as the second option:
+You can also exclude proto files that match specific path expressions. This is done by passing a second option segment
+delimited by `:`. For example, you can pass any number of comma separated patterns with `exclude_patterns`:
 
 ```
 docker run --rm \
   -v $(pwd)/examples/doc:/out \
   -v $(pwd)/examples/proto:/protos \
-  daotl/protoc-gen-doc --doc_opt=:google/*,somepath/*
+  daotl/protoc-gen-doc --doc_opt=:exclude_patterns=google/*,somepath/*
 ```
 
 _**Remember**_: Paths should be from within the container, not the host!
@@ -95,10 +95,10 @@ For example, to generate HTML documentation for all `.proto` files in the `proto
 
 ### Excluding Files
 
-You can exclude proto files that match specific path expressions by passing a second option delimited by `:` and
-comma-separated patterns:
+You can exclude proto files that match specific path expressions by passing a second option delimited by `:` with
+comma-separated `exclude_patterns`:
 
-    protoc --doc_out=./doc --doc_opt=html,index.html:google/*,third_party/* proto/*.proto
+    protoc --doc_out=./doc --doc_opt=html,index.html:exclude_patterns=google/*,third_party/* proto/*.proto
 
 The plugin executable must be in `PATH` for this to work. 
 
@@ -120,12 +120,13 @@ If you'd like to use your own template, simply use the path to the template file
 
 ### Additional Options
 
-You can pass a third `--doc_opt` segment after a second `:` for extra options:
+You can pass additional options in the second segment after `:`:
 
-    protoc --doc_out=./doc --doc_opt=html,index.html::camel_case_fields=true proto/*.proto
+    protoc --doc_out=./doc --doc_opt=html,index.html:exclude_patterns=google/*,camel_case_fields=true proto/*.proto
 
-Supported options:
+Supported options in the second segment:
 
+- `exclude_patterns=...`: one or more comma-separated patterns to exclude.
 - `camel_case_fields=true|false`: emit field names in lowerCamelCase (default `false`).
 
 For information about the available template arguments and functions, see [Custom Templates][custom]. If you just want

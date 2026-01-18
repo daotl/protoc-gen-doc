@@ -67,7 +67,7 @@ func TestParseOptionsForCustomTemplate(t *testing.T) {
 
 func TestParseOptionsForExcludePatterns(t *testing.T) {
 	req := new(plugin_go.CodeGeneratorRequest)
-	req.Parameter = proto.String(":google/*,notgoogle/*")
+	req.Parameter = proto.String(":exclude_patterns=google/*,notgoogle/*")
 
 	options, err := ParseOptions(req)
 	require.NoError(t, err)
@@ -86,6 +86,9 @@ func TestParseOptionsWithInvalidValues(t *testing.T) {
 		"/some/path.tmpl",
 		"more,than,1,comma",
 		"markdown,index.md,unknown",
+		"markdown,index.md:unknown=1",
+		"markdown,index.md:camel_case_fields=maybe",
+		"markdown,index.md:exclude_patterns",
 	}
 
 	for _, value := range badValues {
