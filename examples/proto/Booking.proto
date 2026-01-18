@@ -64,3 +64,15 @@ service BookingService {
   /// Used to subscribe to updates of the BookingStatus.
   rpc BookingUpdates (BookingStatusID) returns (stream BookingStatus);
 }
+
+/**
+ * @exclude
+ * This comment won't be rendered
+ */
+message ExcludedMessage {
+  string id   = 1; // the id of this message.
+  string name = 2; // @exclude the name of this message
+
+  /* @exclude the value of this message. */
+  int32 value = 3;
+}

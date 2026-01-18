@@ -8,6 +8,7 @@
     - [BookingStatus](#com-example-BookingStatus)
     - [BookingStatusID](#com-example-BookingStatusID)
     - [EmptyBookingMessage](#com-example-EmptyBookingMessage)
+    - [ExcludedMessage](#com-example-ExcludedMessage)
   
     - [BookingService](#com-example-BookingService)
   
@@ -99,6 +100,23 @@ Represents the booking status ID.
 
 ### EmptyBookingMessage
 An empty message for testing
+
+
+
+
+
+
+<a name="com-example-ExcludedMessage"></a>
+
+### ExcludedMessage
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| id | [string](#string) |  | the id of this message. |
+| name | [string](#string) |  |  |
+| value | [int32](#int32) |  |  |
 
 
 
