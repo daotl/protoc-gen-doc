@@ -93,6 +93,13 @@ For example, to generate HTML documentation for all `.proto` files in the `proto
 
     protoc --doc_out=./doc --doc_opt=html,index.html proto/*.proto
 
+### Excluding Files
+
+You can exclude proto files that match specific path expressions by passing a second option delimited by `:` and
+comma-separated patterns:
+
+    protoc --doc_out=./doc --doc_opt=html,index.html:google/*,third_party/* proto/*.proto
+
 The plugin executable must be in `PATH` for this to work. 
 
 ### Using a precompiled binary
@@ -110,6 +117,16 @@ Alternatively, you can specify a pre-built/not in `PATH` binary using the `--plu
 If you'd like to use your own template, simply use the path to the template file rather than the type.
 
     protoc --doc_out=./doc --doc_opt=/path/to/template.tmpl,index.txt proto/*.proto
+
+### Additional Options
+
+You can pass a third `--doc_opt` segment after a second `:` for extra options:
+
+    protoc --doc_out=./doc --doc_opt=html,index.html::camel_case_fields=true proto/*.proto
+
+Supported options:
+
+- `camel_case_fields=true|false`: emit field names in lowerCamelCase (default `false`).
 
 For information about the available template arguments and functions, see [Custom Templates][custom]. If you just want
 to customize the look of the HTML output, put your CSS in `stylesheet.css` next to the output file and it will be picked
