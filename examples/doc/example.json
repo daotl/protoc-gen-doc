@@ -59,7 +59,7 @@
             },
             {
               "name": "confirmation_sent",
-              "description": "Has booking confirmation been sent?",
+              "description": "Has booking confirmation been sent?\n\nMulti-paragraph docs",
               "label": "",
               "type": "bool",
               "longType": "bool",

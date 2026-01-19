@@ -52,7 +52,7 @@
               <entry>confirmation_sent</entry>
               <entry><link linkend="bool">bool</link></entry>
               <entry></entry>
-              <entry><para>Has booking confirmation been sent?</para></entry>
+              <entry><para>Has booking confirmation been sent?</para><para>Multi-paragraph docs</para></entry>
             </row>
             
             <row>
