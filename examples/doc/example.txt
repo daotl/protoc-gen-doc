@@ -79,6 +79,11 @@ An empty message for testing
 
 |value | <<int32,int32>> | |Keep this comment
 
+|value1 | <<int32,int32>> | |Keep this line
+Keep this line also
+
+|value2 | <<int32,int32>> | |Keep this new block
+
 |===========================================
 
 
@@ -91,6 +96,8 @@ An empty message for testing
 
 
 === Address
+Use // or /** */ to document messages, fields and enums.
+
 Represents a mail address.
 
 
@@ -226,7 +233,12 @@ Represents a vehicle that can be hired.
 
 |category | <<com.example.Vehicle.Category,Vehicle.Category>> |optional |Vehicle category.
 
-|daily_hire_rate_dollars | <<sint32,sint32>> |optional |Dollars per day.
+|daily_hire_rate_dollars | <<sint32,sint32>> |optional |Doc comments for fields can come before or
+after the field definition. And just like
+comments for messages / enums, they can be
+multi-paragraph:
+
+Dollars per day.
 
 |daily_hire_rate_cents | <<sint32,sint32>> |optional |Cents per day.
 

@@ -63,29 +63,39 @@ message ExcludedMessage {
   string id   = 1; // the id of this message.
   string name = 2; // @exclude this comment
 
-  // Keep this comment
+  // Keep this comment block 1
   // some more comments 1
+  /* Keep this comment block 2
+     some more comments 2
+  */
   /* @exclude this comment
      some more comments
   */
-  // Keep this comment also
-  // some more comments 2
+  // Keep this comment block 3
+  // some more comments 3
+  /* Keep this comment block 4
+     some more comments 4
+  */
   int32 value = 3;
+
+  // Keep this comment block 1
+  // some more comments 1
+  /* Keep this comments block 2
+     some more comments 2
+  */
+  // @exclude this comment block 3
+  // some more comments 3
+  /* Keep this comment block 4
+     some more comments 4
+  */
+  int32 value2 = 4;
 
   // Keep this line
   // @exclude won't exclude this line
+  // @exclude-line excludes this line
+  // non-leading @exclude-line won't exclude this line
   // Keep this line also
-  int32 value1 = 4;
-
-  /* Keep this block
-     some more comments 1
-  */
-  // @exclude this block
-  // some more comments
-  /* Keep this new block
-     some more comments 1
-  */
-  int32 value2 = 5;
+  int32 value3 = 5;
 }
 
 // The type of model.

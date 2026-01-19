@@ -606,8 +606,9 @@ func descriptionFromComment(comment *protokit.Comment) string {
 	val := strings.TrimLeft(comment.String(), "*/\n ")
 	keptParagraphs := make([]string, 0)
 	if val != "" {
-		// If the overall comment starts with @exclude, skip to detached comments.
-		if !strings.HasPrefix(strings.TrimLeft(val, "*/\n "), "@exclude") {
+		// If the overall comment starts with @exclude (but not @exclude-line), skip to detached comments.
+		trimmedVal := strings.TrimLeft(val, "*/\n ")
+		if !(strings.HasPrefix(trimmedVal, "@exclude") && !strings.HasPrefix(trimmedVal, "@exclude-line")) {
 			// Process line by line, treating C-style block comments with @exclude as paragraph separators
 			lines := strings.Split(val, "\n")
 			currentParagraph := make([]string, 0, len(lines))
@@ -635,6 +636,11 @@ func descriptionFromComment(comment *protokit.Comment) string {
 					continue
 				}
 
+				// @exclude-line removes only the line it's on (when at the beginning)
+				if strings.HasPrefix(trimmed, "@exclude-line") {
+					continue
+				}
+
 				currentParagraph = append(currentParagraph, strings.TrimSpace(trimmed))
 			}
 
@@ -654,8 +660,8 @@ func descriptionFromComment(comment *protokit.Comment) string {
 			if val == "" {
 				continue
 			}
-			// Drop detached chunks that explicitly start with @exclude.
-			if strings.HasPrefix(val, "@exclude") {
+			// Drop detached chunks that explicitly start with @exclude (but not @exclude-line).
+			if strings.HasPrefix(val, "@exclude") && !strings.HasPrefix(val, "@exclude-line") {
 				continue
 			}
 			// Drop detached chunks that contain C-style block comments with @exclude

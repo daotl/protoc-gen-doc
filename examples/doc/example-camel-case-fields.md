@@ -117,6 +117,8 @@ An empty message for testing
 | id | [string](#string) |  | the id of this message. |
 | name | [string](#string) |  |  |
 | value | [int32](#int32) |  | Keep this comment |
+| value1 | [int32](#int32) |  | Keep this line Keep this line also |
+| value2 | [int32](#int32) |  | Keep this new block |
 
 
 
@@ -153,6 +155,8 @@ This file has messages for describing a customer.
 <a name="com-example-Address"></a>
 
 ### Address
+Use // or /** */ to document messages, fields and enums.
+
 Represents a mail address.
 
 
@@ -290,7 +294,9 @@ Represents a vehicle that can be hired.
 | regNumber | [string](#string) | required | Vehicle registration number. |
 | mileage | [sint32](#sint32) | optional | Current vehicle mileage, if known. |
 | category | [Vehicle.Category](#com-example-Vehicle-Category) | optional | Vehicle category. |
-| dailyHireRateDollars | [sint32](#sint32) | optional | Dollars per day. Default: 50 |
+| dailyHireRateDollars | [sint32](#sint32) | optional | Doc comments for fields can come before or after the field definition. And just like comments for messages / enums, they can be multi-paragraph:
+
+Dollars per day. Default: 50 |
 | dailyHireRateCents | [sint32](#sint32) | optional | Cents per day. |
 
 

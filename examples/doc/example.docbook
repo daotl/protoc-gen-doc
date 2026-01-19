@@ -202,6 +202,20 @@
               <entry><para>Keep this comment</para></entry>
             </row>
             
+            <row>
+              <entry>value1</entry>
+              <entry><link linkend="int32">int32</link></entry>
+              <entry></entry>
+              <entry><para>Keep this line</para><para>Keep this line also</para></entry>
+            </row>
+            
+            <row>
+              <entry>value2</entry>
+              <entry><link linkend="int32">int32</link></entry>
+              <entry></entry>
+              <entry><para>Keep this new block</para></entry>
+            </row>
+            
           </tbody>
         </tgroup>
       </table>
@@ -261,7 +275,7 @@
     
     <section id="com.example.Address">
       <title>Address</title>
-      <para>Represents a mail address.</para>
+      <para>Use // or /** */ to document messages, fields and enums.</para><para>Represents a mail address.</para>
       
       <table frame="all">
         <title><classname>Address</classname> Fields</title>
@@ -656,7 +670,7 @@
               <entry>daily_hire_rate_dollars</entry>
               <entry><link linkend="sint32">sint32</link></entry>
               <entry>optional</entry>
-              <entry><para>Dollars per day.</para><para>Default: 50</para></entry>
+              <entry><para>Doc comments for fields can come before or</para><para>after the field definition. And just like</para><para>comments for messages / enums, they can be</para><para>multi-paragraph:</para><para>Dollars per day.</para><para>Default: 50</para></entry>
             </row>
             
             <row>

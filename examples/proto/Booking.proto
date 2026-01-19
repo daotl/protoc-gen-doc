@@ -76,4 +76,14 @@ message ExcludedMessage {
   // Keep this comment
   /* @exclude this comment */
   int32 value = 3;
+
+  // Keep this line
+  // @exclude-line excludes this line
+  // Keep this line also
+  int32 value1 = 4;
+
+  // @exclude this block
+  // some more comments
+  /* Keep this new block */
+  int32 value2 = 5;
 }

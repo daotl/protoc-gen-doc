@@ -226,6 +226,30 @@
               "isoneof": false,
               "oneofdecl": "",
               "defaultValue": ""
+            },
+            {
+              "name": "value1",
+              "description": "Keep this line\nKeep this line also",
+              "label": "",
+              "type": "int32",
+              "longType": "int32",
+              "fullType": "int32",
+              "ismap": false,
+              "isoneof": false,
+              "oneofdecl": "",
+              "defaultValue": ""
+            },
+            {
+              "name": "value2",
+              "description": "Keep this new block",
+              "label": "",
+              "type": "int32",
+              "longType": "int32",
+              "fullType": "int32",
+              "ismap": false,
+              "isoneof": false,
+              "oneofdecl": "",
+              "defaultValue": ""
             }
           ]
         }
@@ -291,7 +315,7 @@
           "name": "Address",
           "longName": "Address",
           "fullName": "com.example.Address",
-          "description": "Represents a mail address.",
+          "description": "Use // or /** */ to document messages, fields and enums.\n\nRepresents a mail address.",
           "hasExtensions": false,
           "hasFields": true,
           "hasOneofs": false,
@@ -801,7 +825,7 @@
             },
             {
               "name": "daily_hire_rate_dollars",
-              "description": "Dollars per day.",
+              "description": "Doc comments for fields can come before or\nafter the field definition. And just like\ncomments for messages / enums, they can be\nmulti-paragraph:\n\nDollars per day.",
               "label": "optional",
               "type": "sint32",
               "longType": "sint32",

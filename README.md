@@ -167,10 +167,13 @@ enum MyEnum {
 
 **Excluding comments**
 
-If you want to have some comment in your proto files, but don't want them to be part of the docs, you can simply prefix
-the comment with `@exclude`. 
+If you want to have some comment in your proto files, but don't want them to be part of the docs, you can use the
+`@exclude` and `@exclude-line` directives.
 
-Example: include only the comment for the `id` field
+### `@exclude` - Exclude entire paragraphs
+
+The `@exclude` directive excludes entire paragraphs when it appears at the start of a paragraph (blank lines
+separate paragraphs):
 
 ```protobuf
 /**
@@ -181,10 +184,65 @@ message ExcludedMessage {
   string id   = 1; // the id of this message.
   string name = 2; // @exclude the name of this message
 
-  /* @exclude the value of this message. */
+  // @exclude this entire paragraph
+  // some more comments
   int32 value = 3;
+
+  /* @exclude this block too */
+  int32 value2 = 4;
 }
 ```
+
+### `@exclude-line` - Exclude single lines
+
+The `@exclude-line` directive excludes only the line it appears on (when it's at the beginning of the line),
+while keeping other lines in the same paragraph:
+
+```protobuf
+// Keep this line
+// @exclude-line excludes this line
+// Keep this line also
+int32 value1 = 5;
+```
+
+**Output:** `Keep this line\nKeep this line also`
+
+Note: `@exclude-line` only works when it appears at the beginning of a line (after trimming whitespace). If it
+appears elsewhere in the line, the line will not be excluded:
+
+```protobuf
+// Keep this line
+// @exclude won't exclude this line
+// @exclude-line excludes this line
+// non-leading @exclude-line won't exclude this line
+// Keep this line also
+int32 value2 = 6;
+```
+
+**Output:** `Keep this line\n@exclude won't exclude this line\nnon-leading @exclude-line won't exclude this line\nKeep this line also`
+
+### Multi-paragraph comments
+
+Comments are grouped into paragraphs separated by blank lines or block comments containing `@exclude`.
+All non-excluded parts are preserved in their original paragraph structure:
+
+```protobuf
+/* Keep this comment */
+// @exclude middle paragraph
+/* Keep this comment also */
+int32 value = 6;
+```
+
+**Output:** `Keep this comment\n\nKeep this comment also`
+
+```protobuf
+// Keep this comment
+/* @exclude middle paragraph */
+// Keep this comment also
+int32 value = 7;
+```
+
+**Output:** `Keep this comment\n\nKeep this comment also`
 
 Check out the [example protos](examples/proto) to see all the options.
 

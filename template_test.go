@@ -431,22 +431,23 @@ func TestExcludedComments(t *testing.T) {
 	require.Empty(t, message.Description)
 	require.Empty(t, findField("name", message).Description)
 
-	// value: C-style block comment with @exclude acts as paragraph separator
-	// Comments before and after the block are preserved
-	require.Equal(t, "Keep this comment\nsome more comments 1\n\nKeep this comment also\nsome more comments 2",
+	// value: Each comment block (C++ or C-style) is treated as a separate unit
+	// Blocks with @exclude are excluded
+	require.Equal(t, "Keep this comment block 1\nsome more comments 1\n\nKeep this comment block 2\nsome more comments 2\n\nKeep this comment block 3\nsome more comments 3\n\nKeep this comment block 4\nsome more comments 4",
 		findField("value", message).Description)
 
 	// just checking that it doesn't exclude everything
 	require.Equal(t, "the id of this message.", findField("id", message).Description)
 
-	// @exclude only works at paragraph/block level, not line level
-	// So this line with @exclude in the middle is preserved
-	require.Equal(t, "Keep this line\n@exclude won't exclude this line\nKeep this line also",
-		findField("value1", message).Description)
-
-	// Multi-block comment: first block kept, middle paragraph with @exclude excluded, last block kept
-	require.Equal(t, "Keep this block\nsome more comments 1\n\nKeep this new block\nsome more comments 1",
+	// value2: @exclude on a C++ comment line excludes the entire paragraph
+	// But block comments before and after are preserved as separate paragraphs
+	require.Equal(t, "Keep this comment block 1\nsome more comments 1\n\nKeep this comments block 2\nsome more comments 2\n\nKeep this comment block 4\nsome more comments 4",
 		findField("value2", message).Description)
+
+	// value3: @exclude only works at paragraph/block level, not line level
+	// @exclude-line excludes only the line it's on (when at the beginning)
+	require.Equal(t, "Keep this line\n@exclude won't exclude this line\nnon-leading @exclude-line won't exclude this line\nKeep this line also",
+		findField("value3", message).Description)
 }
 
 func findService(name string, f *File) *Service {
