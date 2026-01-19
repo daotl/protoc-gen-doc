@@ -39,14 +39,14 @@ func TestParaFilter(t *testing.T) {
 func TestNoBrFilter(t *testing.T) {
 	tests := map[string]string{
 		"My content":                     "My content",
-		"My content \r\nHere.":           "My content Here.",
-		"My\n content\r right\r\n here.": "My content right here.",
-		"My\ncontent\rright\r\nhere.":    "My content right here.",
-		"My content.\n\nMore content.":   "My content.\n\nMore content.",
+		"My content \r\nHere.":           "My content<br>Here.",
+		"My\n content\r right\r\n here.": "My<br>content<br>right<br>here.",
+		"My\ncontent\rright\r\nhere.":    "My<br>content<br>right<br>here.",
+		"My content.\n\nMore content.":   "My content.<br><br>More content.",
 	}
 
 	for input, output := range tests {
-		require.Equal(t, output, NoBrFilter(input))
+		require.Equal(t, html.HTML(output), NoBrFilter(input))
 	}
 }
 

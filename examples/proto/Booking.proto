@@ -37,6 +37,7 @@ message Booking {
   BookingStatus status = 3; /// Status of the booking.
 
   /** Has booking confirmation been sent? */
+  // Multi-paragraph docs
   bool confirmation_sent = 4;
 
   /** Has payment been received? */

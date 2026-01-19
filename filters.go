@@ -26,16 +26,24 @@ func ParaFilter(content string) string {
 	return fmt.Sprintf("<para>%s</para>", strings.Join(paragraphs, "</para><para>"))
 }
 
-// NoBrFilter removes single CR and LF from content.
-func NoBrFilter(content string) string {
+// NoBrFilter removes single CR and LF from content, replacing them with <br> for proper
+// rendering in markdown and HTML tables.
+func NoBrFilter(content string) template.HTML {
 	normalized := strings.Replace(content, "\r\n", "\n", -1)
 	paragraphs := multiNewlinePattern.Split(normalized, -1)
 	for i, p := range paragraphs {
-		withoutCR := strings.Replace(p, "\r", " ", -1)
-		withoutLF := strings.Replace(withoutCR, "\n", " ", -1)
-		paragraphs[i] = spacePattern.ReplaceAllString(withoutLF, " ")
+		// First normalize multiple spaces to single space
+		p = spacePattern.ReplaceAllString(p, " ")
+		// Then replace newlines with <br>
+		withoutCR := strings.Replace(p, "\r", "<br>", -1)
+		withoutLF := strings.Replace(withoutCR, "\n", "<br>", -1)
+		// Trim any extra spaces around <br> tags
+		withoutLF = strings.Replace(withoutLF, " <br>", "<br>", -1)
+		withoutLF = strings.Replace(withoutLF, "<br> ", "<br>", -1)
+		paragraphs[i] = withoutLF
 	}
-	return strings.Join(paragraphs, "\n\n")
+	// Join paragraphs with <br><br> instead of \n\n for proper table rendering
+	return template.HTML(strings.Join(paragraphs, "<br><br>"))
 }
 
 // AnchorFilter replaces all special characters with URL friendly dashes

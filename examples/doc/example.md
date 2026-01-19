@@ -57,7 +57,7 @@ Vehicles are some cool shit. But drive carefully!
 | vehicle_id | [int32](#int32) |  | ID of booked vehicle. |
 | customer_id | [int32](#int32) |  | Customer that booked the vehicle. |
 | status | [BookingStatus](#com-example-BookingStatus) |  | Status of the booking. |
-| confirmation_sent | [bool](#bool) |  | Has booking confirmation been sent? |
+| confirmation_sent | [bool](#bool) |  | Has booking confirmation been sent?<br><br>Multi-paragraph docs |
 | payment_received | [bool](#bool) |  | Has payment been received? |
 | color_preference | [string](#string) |  | **Deprecated.** Color preference of the customer. |
 
@@ -75,7 +75,7 @@ Represents the status of a vehicle booking.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | id | [int32](#int32) |  | Unique booking status ID. |
-| description | [string](#string) |  | Booking status description. E.g. &#34;Active&#34;. |
+| description | [string](#string) |  | Booking status description. E.g. "Active". |
 
 
 
@@ -108,13 +108,9 @@ This comment won&#39;t be rendered when using @skip directive
 | ----- | ---- | ----- | ----------- |
 | id | [string](#string) |  | the id of this message. |
 | name | [string](#string) |  | @skip this comment when using @skip directive |
-| value | [int32](#int32) |  | Keep this comment
-
-@skip this block comment when using @skip directive |
-| value1 | [int32](#int32) |  | Keep this line buf:lint:ignore FIELD_COMMENT |
-| value2 | [int32](#int32) |  | @skip this paragraph when using @skip directive some more comments
-
-Keep this new block |
+| value | [int32](#int32) |  | Keep this comment<br><br>@skip this block comment when using @skip directive |
+| value1 | [int32](#int32) |  | Keep this line<br>buf:lint:ignore FIELD_COMMENT |
+| value2 | [int32](#int32) |  | @skip this paragraph when using @skip directive<br>some more comments<br><br>Keep this new block |
 
 
 
@@ -142,7 +138,7 @@ An empty message for testing
 | id | [string](#string) |  | the id of this message. |
 | name | [string](#string) |  |  |
 | value | [int32](#int32) |  | Keep this comment |
-| value1 | [int32](#int32) |  | Keep this line Keep this line also |
+| value1 | [int32](#int32) |  | Keep this line<br>Keep this line also |
 | value2 | [int32](#int32) |  | Keep this new block |
 
 
@@ -278,7 +274,7 @@ Represents a manufacturer of cars.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | id | [int32](#int32) | required | The unique manufacturer ID. |
-| code | [string](#string) | required | A manufacturer code, e.g. &#34;DKL4P&#34;. |
+| code | [string](#string) | required | A manufacturer code, e.g. "DKL4P". |
 | details | [string](#string) | optional | Manufacturer details (minimum orders et.c.). |
 | category | [Manufacturer.Category](#com-example-Manufacturer-Category) | optional | Manufacturer category. Default: CATEGORY_EXTERNAL |
 
@@ -296,8 +292,8 @@ Represents a vehicle model.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | id | [string](#string) | required | The unique model ID. |
-| model_code | [string](#string) | required | The car model code, e.g. &#34;PZ003&#34;. |
-| model_name | [string](#string) | required | The car model name, e.g. &#34;Z3&#34;. |
+| model_code | [string](#string) | required | The car model code, e.g. "PZ003". |
+| model_name | [string](#string) | required | The car model name, e.g. "Z3". |
 | daily_hire_rate_dollars | [sint32](#sint32) | required | Dollars per day. |
 | daily_hire_rate_cents | [sint32](#sint32) | required | Cents per day. |
 
@@ -319,9 +315,7 @@ Represents a vehicle that can be hired.
 | reg_number | [string](#string) | required | Vehicle registration number. |
 | mileage | [sint32](#sint32) | optional | Current vehicle mileage, if known. |
 | category | [Vehicle.Category](#com-example-Vehicle-Category) | optional | Vehicle category. |
-| daily_hire_rate_dollars | [sint32](#sint32) | optional | Doc comments for fields can come before or after the field definition. And just like comments for messages / enums, they can be multi-paragraph:
-
-Dollars per day. Default: 50 |
+| daily_hire_rate_dollars | [sint32](#sint32) | optional | Doc comments for fields can come before or<br>after the field definition. And just like<br>comments for messages / enums, they can be<br>multi-paragraph:<br><br>Dollars per day. Default: 50 |
 | daily_hire_rate_cents | [sint32](#sint32) | optional | Cents per day. |
 
 
@@ -342,8 +336,8 @@ Represents a vehicle category. E.g. &#34;Sedan&#34; or &#34;Truck&#34;.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| code | [string](#string) | required | Category code. E.g. &#34;S&#34;. |
-| description | [string](#string) | required | Category name. E.g. &#34;Sedan&#34;. |
+| code | [string](#string) | required | Category code. E.g. "S". |
+| description | [string](#string) | required | Category name. E.g. "Sedan". |
 
 
 

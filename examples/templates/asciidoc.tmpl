@@ -8,13 +8,13 @@
 {{range .Messages}}
 
 === {{.LongName}}
-{{nobr .Description}}
+{{.Description}}
 
 {{if .HasFields}}
 |===========================================
 |*Field* |*Type* |*Label* |*Description*
 {{range .Fields}}
-|{{.Name}} | <<{{.FullType}},{{.LongType}}>> |{{.Label}} |{{.Description}}
+|{{.Name}} | <<{{.FullType}},{{.LongType}}>> |{{.Label}} |{{nobr .Description}}
 {{end}}
 |===========================================
 {{end}}
@@ -29,7 +29,7 @@
 |=====================================
 |*Name* |*Number* |*Description*
 {{range .Values}}
-|{{.Name}} |{{.Number}} |{{.Description}}
+|{{.Name}} |{{.Number}} |{{nobr .Description}}
 {{end}}
 |=====================================
 {{end}}
