@@ -28,7 +28,7 @@ func NewTemplate(descs []*protokit.FileDescriptor, pluginOptions *PluginOptions)
 	for _, f := range descs {
 		file := &File{
 			Name:          f.GetName(),
-			Description:   descriptionFromComment(f.GetSyntaxComments()),
+			Description:   descriptionFromComment(f.GetSyntaxComments(), pluginOptions),
 			Package:       f.GetPackage(),
 			HasEnums:      len(f.Enums) > 0,
 			HasExtensions: len(f.Extensions) > 0,
@@ -43,11 +43,11 @@ func NewTemplate(descs []*protokit.FileDescriptor, pluginOptions *PluginOptions)
 		}
 
 		for _, e := range f.Enums {
-			file.Enums = append(file.Enums, parseEnum(e))
+			file.Enums = append(file.Enums, parseEnum(e, pluginOptions))
 		}
 
 		for _, e := range f.Extensions {
-			file.Extensions = append(file.Extensions, parseFileExtension(e))
+			file.Extensions = append(file.Extensions, parseFileExtension(e, pluginOptions))
 		}
 
 		// Recursively add nested types from messages
@@ -55,7 +55,7 @@ func NewTemplate(descs []*protokit.FileDescriptor, pluginOptions *PluginOptions)
 		addFromMessage = func(m *protokit.Descriptor) {
 			file.Messages = append(file.Messages, parseMessage(m, pluginOptions))
 			for _, e := range m.Enums {
-				file.Enums = append(file.Enums, parseEnum(e))
+				file.Enums = append(file.Enums, parseEnum(e, pluginOptions))
 			}
 			for _, n := range m.Messages {
 				addFromMessage(n)
@@ -66,7 +66,7 @@ func NewTemplate(descs []*protokit.FileDescriptor, pluginOptions *PluginOptions)
 		}
 
 		for _, s := range f.Services {
-			file.Services = append(file.Services, parseService(s))
+			file.Services = append(file.Services, parseService(s, pluginOptions))
 		}
 
 		sort.Sort(file.Enums)
@@ -413,12 +413,12 @@ type ScalarValue struct {
 	RubyType   string `json:"rubyType"`
 }
 
-func parseEnum(pe *protokit.EnumDescriptor) *Enum {
+func parseEnum(pe *protokit.EnumDescriptor, pluginOptions *PluginOptions) *Enum {
 	enum := &Enum{
 		Name:        pe.GetName(),
 		LongName:    pe.GetLongName(),
 		FullName:    pe.GetFullName(),
-		Description: descriptionFromComment(pe.GetComments()),
+		Description: descriptionFromComment(pe.GetComments(), pluginOptions),
 		Options: mergeOptions(extractOptions(pe.GetOptions()),
 			extensions.Transform(pe.OptionExtensions)),
 	}
@@ -427,7 +427,7 @@ func parseEnum(pe *protokit.EnumDescriptor) *Enum {
 		enum.Values = append(enum.Values, &EnumValue{
 			Name:        val.GetName(),
 			Number:      fmt.Sprint(val.GetNumber()),
-			Description: descriptionFromComment(val.GetComments()),
+			Description: descriptionFromComment(val.GetComments(), pluginOptions),
 			Options: mergeOptions(extractOptions(val.GetOptions()),
 				extensions.Transform(val.OptionExtensions)),
 		})
@@ -436,14 +436,14 @@ func parseEnum(pe *protokit.EnumDescriptor) *Enum {
 	return enum
 }
 
-func parseFileExtension(pe *protokit.ExtensionDescriptor) *FileExtension {
+func parseFileExtension(pe *protokit.ExtensionDescriptor, pluginOptions *PluginOptions) *FileExtension {
 	t, lt, ft := parseType(pe)
 
 	return &FileExtension{
 		Name:               pe.GetName(),
 		LongName:           pe.GetLongName(),
 		FullName:           pe.GetFullName(),
-		Description:        descriptionFromComment(pe.GetComments()),
+		Description:        descriptionFromComment(pe.GetComments(), pluginOptions),
 		Label:              labelName(pe.GetLabel(), pe.IsProto3(), pe.GetProto3Optional()),
 		Type:               t,
 		LongType:           lt,
@@ -461,7 +461,7 @@ func parseMessage(pm *protokit.Descriptor, pluginOptions *PluginOptions) *Messag
 		Name:          pm.GetName(),
 		LongName:      pm.GetLongName(),
 		FullName:      pm.GetFullName(),
-		Description:   descriptionFromComment(pm.GetComments()),
+		Description:   descriptionFromComment(pm.GetComments(), pluginOptions),
 		HasExtensions: len(pm.GetExtensions()) > 0,
 		HasFields:     len(pm.GetMessageFields()) > 0,
 		HasOneofs:     len(pm.GetOneofDecl()) > 0,
@@ -472,7 +472,7 @@ func parseMessage(pm *protokit.Descriptor, pluginOptions *PluginOptions) *Messag
 	}
 
 	for _, ext := range pm.Extensions {
-		msg.Extensions = append(msg.Extensions, parseMessageExtension(ext))
+		msg.Extensions = append(msg.Extensions, parseMessageExtension(ext, pluginOptions))
 	}
 
 	for _, f := range pm.Fields {
@@ -482,9 +482,9 @@ func parseMessage(pm *protokit.Descriptor, pluginOptions *PluginOptions) *Messag
 	return msg
 }
 
-func parseMessageExtension(pe *protokit.ExtensionDescriptor) *MessageExtension {
+func parseMessageExtension(pe *protokit.ExtensionDescriptor, pluginOptions *PluginOptions) *MessageExtension {
 	return &MessageExtension{
-		FileExtension: *parseFileExtension(pe),
+		FileExtension: *parseFileExtension(pe, pluginOptions),
 		ScopeType:     pe.GetParent().GetName(),
 		ScopeLongType: pe.GetParent().GetLongName(),
 		ScopeFullType: pe.GetParent().GetFullName(),
@@ -501,7 +501,7 @@ func parseMessageField(pf *protokit.FieldDescriptor, oneofDecls []*descriptor.On
 
 	m := &MessageField{
 		Name:         name,
-		Description:  descriptionFromComment(pf.GetComments()),
+		Description:  descriptionFromComment(pf.GetComments(), pluginOptions),
 		Label:        labelName(pf.GetLabel(), pf.IsProto3(), pf.GetProto3Optional()),
 		Type:         t,
 		LongType:     lt,
@@ -530,27 +530,27 @@ func parseMessageField(pf *protokit.FieldDescriptor, oneofDecls []*descriptor.On
 	return m
 }
 
-func parseService(ps *protokit.ServiceDescriptor) *Service {
+func parseService(ps *protokit.ServiceDescriptor, pluginOptions *PluginOptions) *Service {
 	service := &Service{
 		Name:        ps.GetName(),
 		LongName:    ps.GetLongName(),
 		FullName:    ps.GetFullName(),
-		Description: descriptionFromComment(ps.GetComments()),
+		Description: descriptionFromComment(ps.GetComments(), pluginOptions),
 		Options: mergeOptions(extractOptions(ps.GetOptions()),
 			extensions.Transform(ps.OptionExtensions)),
 	}
 
 	for _, sm := range ps.Methods {
-		service.Methods = append(service.Methods, parseServiceMethod(sm))
+		service.Methods = append(service.Methods, parseServiceMethod(sm, pluginOptions))
 	}
 
 	return service
 }
 
-func parseServiceMethod(pm *protokit.MethodDescriptor) *ServiceMethod {
+func parseServiceMethod(pm *protokit.MethodDescriptor, pluginOptions *PluginOptions) *ServiceMethod {
 	return &ServiceMethod{
 		Name:              pm.GetName(),
-		Description:       descriptionFromComment(pm.GetComments()),
+		Description:       descriptionFromComment(pm.GetComments(), pluginOptions),
 		RequestType:       baseName(pm.GetInputType()),
 		RequestLongType:   strings.TrimPrefix(pm.GetInputType(), "."+pm.GetPackage()+"."),
 		RequestFullType:   strings.TrimPrefix(pm.GetInputType(), "."),
@@ -595,21 +595,55 @@ func parseType(tc typeContainer) (string, string, string) {
 	return name, name, name
 }
 
-func descriptionFromComment(comment *protokit.Comment) string {
+func descriptionFromComment(comment *protokit.Comment, pluginOptions *PluginOptions) string {
 	if comment == nil {
 		return ""
 	}
 
+	// Helper function to check if a string starts with any of the exclude directives
+	startsWithExcludeDirective := func(s string) bool {
+		for _, directive := range pluginOptions.ExcludeDirectives {
+			if strings.HasPrefix(s, directive) {
+				return true
+			}
+		}
+		return false
+	}
+
+	// Helper function to check if a string starts with any of the exclude line directives
+	startsWithExcludeLineDirective := func(s string) bool {
+		for _, directive := range pluginOptions.ExcludeLineDirectives {
+			if strings.HasPrefix(s, directive) {
+				return true
+			}
+		}
+		return false
+	}
+
+	// Helper function to check if a block comment starts with any exclude directive (but not line directive)
+	checkExcludeInBlockComment := func(s string) bool {
+		if !strings.Contains(s, "*/") {
+			return false
+		}
+		// Check if it starts with any exclude directive (but not line directive)
+		for _, directive := range pluginOptions.ExcludeDirectives {
+			if strings.HasPrefix(s, directive) && !startsWithExcludeLineDirective(s) {
+				return true
+			}
+		}
+		return false
+	}
+
 	// Prefer leading comments (no blank line) over detached comments (blank line),
-	// so that /* @exclude ... */ directives in leading comments are stripped
+	// so that block comments with exclude directives in leading comments are stripped
 	// while the documentation is preserved.
 	val := strings.TrimLeft(comment.String(), "*/\n ")
 	keptParagraphs := make([]string, 0)
 	if val != "" {
-		// If the overall comment starts with @exclude (but not @exclude-line), skip to detached comments.
+		// If the overall comment starts with any exclude directive (but not exclude line directive), skip to detached comments.
 		trimmedVal := strings.TrimLeft(val, "*/\n ")
-		if !(strings.HasPrefix(trimmedVal, "@exclude") && !strings.HasPrefix(trimmedVal, "@exclude-line")) {
-			// Process line by line, treating C-style block comments with @exclude as paragraph separators
+		if !startsWithExcludeDirective(trimmedVal) || startsWithExcludeLineDirective(trimmedVal) {
+			// Process line by line, treating block comments with exclude directives as paragraph separators
 			lines := strings.Split(val, "\n")
 			currentParagraph := make([]string, 0, len(lines))
 
@@ -624,9 +658,9 @@ func descriptionFromComment(comment *protokit.Comment) string {
 					continue
 				}
 
-				// Check if this is a C-style block comment with @exclude
+				// Check if this is a block comment with an exclude directive
 				// After trimming, "/* @exclude ... */" becomes "@exclude ... */"
-				if strings.Contains(trimmed, "@exclude") && strings.Contains(trimmed, "*/") {
+				if checkExcludeInBlockComment(trimmed) {
 					// This acts as a paragraph separator - finalize current paragraph if any
 					if len(currentParagraph) > 0 {
 						keptParagraphs = append(keptParagraphs, strings.Join(currentParagraph, "\n"))
@@ -636,8 +670,8 @@ func descriptionFromComment(comment *protokit.Comment) string {
 					continue
 				}
 
-				// @exclude-line removes only the line it's on (when at the beginning)
-				if strings.HasPrefix(trimmed, "@exclude-line") {
+				// Exclude line directives remove only the line it's on (when at the beginning)
+				if startsWithExcludeLineDirective(trimmed) {
 					continue
 				}
 
@@ -651,7 +685,7 @@ func descriptionFromComment(comment *protokit.Comment) string {
 		}
 	}
 
-	// Also process detached comments (excluding those with @exclude)
+	// Also process detached comments (excluding those with exclude directives)
 	// and combine them with leading comments
 	detachedParagraphs := make([]string, 0)
 	if len(comment.GetDetached()) > 0 {
@@ -660,20 +694,20 @@ func descriptionFromComment(comment *protokit.Comment) string {
 			if val == "" {
 				continue
 			}
-			// Drop detached chunks that explicitly start with @exclude (but not @exclude-line).
-			if strings.HasPrefix(val, "@exclude") && !strings.HasPrefix(val, "@exclude-line") {
+			// Drop detached chunks that explicitly start with any exclude directive.
+			if startsWithExcludeDirective(val) {
 				continue
 			}
-			// Drop detached chunks that contain C-style block comments with @exclude
-			if strings.Contains(val, "@exclude") && strings.Contains(val, "*/") {
-				// Split by the @exclude block and keep the parts before/after
+			// Drop detached chunks that contain block comments with exclude directives
+			if checkExcludeInBlockComment(val) {
+				// Split by the exclude directive block and keep the parts before/after
 				lines := strings.Split(val, "\n")
 				for _, line := range lines {
 					trimmed := strings.TrimLeft(line, "*/\n ")
 					if strings.TrimSpace(trimmed) == "" {
 						continue
 					}
-					if strings.Contains(trimmed, "@exclude") && strings.Contains(trimmed, "*/") {
+					if checkExcludeInBlockComment(trimmed) {
 						continue
 					}
 					detachedParagraphs = append(detachedParagraphs, trimmed)

@@ -29,14 +29,20 @@ func TestMain(m *testing.M) {
 	req := utils.CreateGenRequest(set, "Booking.proto", "Vehicle.proto")
 	result := protokit.ParseCodeGenRequest(req)
 
-	template = NewTemplate(result, &PluginOptions{})
+	template = NewTemplate(result, &PluginOptions{
+		ExcludeDirectives:     []string{"@exclude"},
+		ExcludeLineDirectives: []string{"@exclude-line"},
+	})
 	bookingFile = template.Files[0]
 	vehicleFile = template.Files[1]
 
 	set, _ = utils.LoadDescriptorSet("fixtures", "cookie.pb")
 	req = utils.CreateGenRequest(set, "Cookie.proto")
 	result = protokit.ParseCodeGenRequest(req)
-	cookieTemplate = NewTemplate(result, &PluginOptions{})
+	cookieTemplate = NewTemplate(result, &PluginOptions{
+		ExcludeDirectives:     []string{"@exclude"},
+		ExcludeLineDirectives: []string{"@exclude-line"},
+	})
 	cookieFile = cookieTemplate.Files[0]
 
 	os.Exit(m.Run())
@@ -448,6 +454,112 @@ func TestExcludedComments(t *testing.T) {
 	// @exclude-line excludes only the line it's on (when at the beginning)
 	require.Equal(t, "Keep this line\n@exclude won't exclude this line\nnon-leading @exclude-line won't exclude this line\nKeep this line also",
 		findField("value3", message).Description)
+}
+
+func TestCustomExcludeDirectives(t *testing.T) {
+	// Test with custom exclude directive
+	set, _ := utils.LoadDescriptorSet("fixtures", "fileset.pb")
+	req := utils.CreateGenRequest(set, "Vehicle.proto")
+	result := protokit.ParseCodeGenRequest(req)
+
+	// Use custom directives that won't match @exclude
+	customTemplate := NewTemplate(result, &PluginOptions{
+		ExcludeDirectives:     []string{"@skip", "@nodoc"},
+		ExcludeLineDirectives: []string{"@skip-line"},
+	})
+	customFile := customTemplate.Files[0]
+
+	// With custom directives, @exclude is not recognized
+	// so the ExcludedMessage should have its description
+	message := findMessage("ExcludedMessage", customFile)
+	require.NotEmpty(t, message.Description)
+	require.Contains(t, message.Description, "@exclude")
+	require.Contains(t, message.Description, "This comment won't be rendered")
+
+	// Fields with @exclude-line should also not be excluded
+	require.Contains(t, findField("value3", message).Description, "@exclude-line")
+}
+
+func TestMultipleExcludeDirectives(t *testing.T) {
+	// Test with multiple exclude directives
+	set, _ := utils.LoadDescriptorSet("fixtures", "fileset.pb")
+	req := utils.CreateGenRequest(set, "Vehicle.proto")
+	result := protokit.ParseCodeGenRequest(req)
+
+	// Use multiple directives including both @exclude and buf:lint:ignore
+	multiTemplate := NewTemplate(result, &PluginOptions{
+		ExcludeDirectives:     []string{"@exclude", "buf:lint:ignore", "SKIP"},
+		ExcludeLineDirectives: []string{"@exclude-line", "skipcq"},
+	})
+
+	// The template should be created successfully with multiple directives
+	require.NotNil(t, multiTemplate)
+	require.Len(t, multiTemplate.Files, 1)
+}
+
+func TestBookingCustomDirectives(t *testing.T) {
+	// Test Booking.proto with custom @skip and buf:lint:ignore directives
+	set, _ := utils.LoadDescriptorSet("fixtures", "fileset.pb")
+	req := utils.CreateGenRequest(set, "Booking.proto")
+	result := protokit.ParseCodeGenRequest(req)
+
+	// Use custom directives: @skip for block exclusion, buf:lint:ignore for line exclusion
+	customTemplate := NewTemplate(result, &PluginOptions{
+		ExcludeDirectives:     []string{"@skip"},
+		ExcludeLineDirectives: []string{"buf:lint:ignore"},
+	})
+	bookingFile := customTemplate.Files[0]
+
+	// Find the CustomExcludedMessage
+	message := findMessage("CustomExcludedMessage", bookingFile)
+	require.NotNil(t, message)
+
+	// Message description should be empty (excluded by @skip directive)
+	require.Empty(t, message.Description)
+
+	// name field comment should be empty (excluded by @skip directive)
+	require.Empty(t, findField("name", message).Description)
+
+	// value field: block comment with @skip should be excluded, keeping only "Keep this comment"
+	require.Equal(t, "Keep this comment", findField("value", message).Description)
+
+	// value1 field: line with buf:lint:ignore should be excluded
+	require.Equal(t, "Keep this line", findField("value1", message).Description)
+
+	// value2 field: paragraph with @skip should be excluded
+	require.Equal(t, "Keep this new block", findField("value2", message).Description)
+
+	// id field comment should be kept
+	require.Equal(t, "the id of this message.", findField("id", message).Description)
+}
+
+func TestBookingDefaultDirectives(t *testing.T) {
+	// Test that default directives don't affect CustomExcludedMessage
+	set, _ := utils.LoadDescriptorSet("fixtures", "fileset.pb")
+	req := utils.CreateGenRequest(set, "Booking.proto")
+	result := protokit.ParseCodeGenRequest(req)
+
+	// Use default directives (@exclude, @exclude-line)
+	defaultTemplate := NewTemplate(result, &PluginOptions{
+		ExcludeDirectives:     []string{"@exclude"},
+		ExcludeLineDirectives: []string{"@exclude-line"},
+	})
+	bookingFile := defaultTemplate.Files[0]
+
+	// Find the CustomExcludedMessage
+	message := findMessage("CustomExcludedMessage", bookingFile)
+	require.NotNil(t, message)
+
+	// With default directives, @skip is NOT recognized, so message description should NOT be empty
+	require.NotEmpty(t, message.Description)
+	require.Contains(t, message.Description, "@skip")
+
+	// name field comment should also NOT be empty
+	require.NotEmpty(t, findField("name", message).Description)
+	require.Contains(t, findField("name", message).Description, "@skip")
+
+	// buf:lint:ignore is also NOT recognized as a line directive, so value1 should contain it
+	require.Contains(t, findField("value1", message).Description, "buf:lint:ignore")
 }
 
 func findService(name string, f *File) *Service {

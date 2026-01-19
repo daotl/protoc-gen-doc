@@ -171,6 +171,78 @@
           ]
         },
         {
+          "name": "CustomExcludedMessage",
+          "longName": "CustomExcludedMessage",
+          "fullName": "com.example.CustomExcludedMessage",
+          "description": "@skip\nThis comment won't be rendered when using @skip directive",
+          "hasExtensions": false,
+          "hasFields": true,
+          "hasOneofs": false,
+          "extensions": [],
+          "fields": [
+            {
+              "name": "id",
+              "description": "the id of this message.",
+              "label": "",
+              "type": "string",
+              "longType": "string",
+              "fullType": "string",
+              "ismap": false,
+              "isoneof": false,
+              "oneofdecl": "",
+              "defaultValue": ""
+            },
+            {
+              "name": "name",
+              "description": "@skip this comment when using @skip directive",
+              "label": "",
+              "type": "string",
+              "longType": "string",
+              "fullType": "string",
+              "ismap": false,
+              "isoneof": false,
+              "oneofdecl": "",
+              "defaultValue": ""
+            },
+            {
+              "name": "value",
+              "description": "Keep this comment\n\n@skip this block comment when using @skip directive",
+              "label": "",
+              "type": "int32",
+              "longType": "int32",
+              "fullType": "int32",
+              "ismap": false,
+              "isoneof": false,
+              "oneofdecl": "",
+              "defaultValue": ""
+            },
+            {
+              "name": "value1",
+              "description": "Keep this line\nbuf:lint:ignore FIELD_COMMENT",
+              "label": "",
+              "type": "int32",
+              "longType": "int32",
+              "fullType": "int32",
+              "ismap": false,
+              "isoneof": false,
+              "oneofdecl": "",
+              "defaultValue": ""
+            },
+            {
+              "name": "value2",
+              "description": "@skip this paragraph when using @skip directive\nsome more comments\n\nKeep this new block",
+              "label": "",
+              "type": "int32",
+              "longType": "int32",
+              "fullType": "int32",
+              "ismap": false,
+              "isoneof": false,
+              "oneofdecl": "",
+              "defaultValue": ""
+            }
+          ]
+        },
+        {
           "name": "EmptyBookingMessage",
           "longName": "EmptyBookingMessage",
           "fullName": "com.example.EmptyBookingMessage",

@@ -7,6 +7,7 @@
     - [Booking](#com-example-Booking)
     - [BookingStatus](#com-example-BookingStatus)
     - [BookingStatusID](#com-example-BookingStatusID)
+    - [CustomExcludedMessage](#com-example-CustomExcludedMessage)
     - [EmptyBookingMessage](#com-example-EmptyBookingMessage)
     - [ExcludedMessage](#com-example-ExcludedMessage)
   
@@ -90,6 +91,30 @@ Represents the booking status ID.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | id | [int32](#int32) |  | Unique booking status ID. |
+
+
+
+
+
+
+<a name="com-example-CustomExcludedMessage"></a>
+
+### CustomExcludedMessage
+@skip
+This comment won&#39;t be rendered when using @skip directive
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| id | [string](#string) |  | the id of this message. |
+| name | [string](#string) |  | @skip this comment when using @skip directive |
+| value | [int32](#int32) |  | Keep this comment
+
+@skip this block comment when using @skip directive |
+| value1 | [int32](#int32) |  | Keep this line buf:lint:ignore FIELD_COMMENT |
+| value2 | [int32](#int32) |  | @skip this paragraph when using @skip directive some more comments
+
+Keep this new block |
 
 
 

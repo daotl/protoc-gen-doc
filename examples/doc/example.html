@@ -191,6 +191,10 @@
                 </li>
               
                 <li>
+                  <a href="#com.example.CustomExcludedMessage"><span class="badge">M</span>CustomExcludedMessage</a>
+                </li>
+              
+                <li>
                   <a href="#com.example.EmptyBookingMessage"><span class="badge">M</span>EmptyBookingMessage</a>
                 </li>
               
@@ -444,6 +448,64 @@
                   <td><a href="#int32">int32</a></td>
                   <td></td>
                   <td><p>Unique booking status ID. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="com.example.CustomExcludedMessage">CustomExcludedMessage</h3>
+        <p>@skip</p><p>This comment won't be rendered when using @skip directive</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>the id of this message. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>@skip this comment when using @skip directive </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Keep this comment
+
+@skip this block comment when using @skip directive </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value1</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Keep this line
+buf:lint:ignore FIELD_COMMENT </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value2</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>@skip this paragraph when using @skip directive
+some more comments
+
+Keep this new block </p></td>
                 </tr>
               
             </tbody>

@@ -87,3 +87,25 @@ message ExcludedMessage {
   /* Keep this new block */
   int32 value2 = 5;
 }
+
+/**
+ * @skip
+ * This comment won't be rendered when using @skip directive
+ */
+message CustomExcludedMessage {
+  string id   = 1; // the id of this message.
+  string name = 2; // @skip this comment when using @skip directive
+
+  // Keep this comment
+  /* @skip this block comment when using @skip directive */
+  int32 value = 3;
+
+  // Keep this line
+  //buf:lint:ignore FIELD_COMMENT
+  int32 value1 = 4;
+
+  // @skip this paragraph when using @skip directive
+  // some more comments
+  /* Keep this new block */
+  int32 value2 = 5;
+}

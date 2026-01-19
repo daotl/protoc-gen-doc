@@ -16,12 +16,14 @@ import (
 // PluginOptions encapsulates options for the plugin. The type of renderer, template file, and the name of the output
 // file are included.
 type PluginOptions struct {
-	Type            RenderType
-	TemplateFile    string
-	OutputFile      string
-	ExcludePatterns []*regexp.Regexp
-	SourceRelative  bool
-	CamelCaseFields bool
+	Type                RenderType
+	TemplateFile         string
+	OutputFile           string
+	ExcludePatterns      []*regexp.Regexp
+	SourceRelative       bool
+	CamelCaseFields      bool
+	ExcludeDirectives    []string // Directives for paragraph/block exclusion (default: ["@exclude"])
+	ExcludeLineDirectives []string // Directives for line-level exclusion (default: ["@exclude-line"])
 }
 
 // SupportedFeatures describes a flag setting for supported features.
@@ -114,11 +116,13 @@ OUTER:
 // The file will be written to the directory specified with the `--doc_out` argument to protoc.
 func ParseOptions(req *plugin_go.CodeGeneratorRequest) (*PluginOptions, error) {
 	options := &PluginOptions{
-		Type:            RenderTypeHTML,
-		TemplateFile:    "",
-		OutputFile:      "index.html",
-		SourceRelative:  false,
-		CamelCaseFields: false,
+		Type:                RenderTypeHTML,
+		TemplateFile:         "",
+		OutputFile:           "index.html",
+		SourceRelative:       false,
+		CamelCaseFields:      false,
+		ExcludeDirectives:    []string{"@exclude"},
+		ExcludeLineDirectives: []string{"@exclude-line"},
 	}
 
 	params := strings.Split(req.GetParameter(), "\n")[0]
@@ -154,6 +158,14 @@ func ParseOptions(req *plugin_go.CodeGeneratorRequest) (*PluginOptions, error) {
 							return nil, err
 						}
 						options.ExcludePatterns = append(options.ExcludePatterns, r)
+					}
+				case "exclude_directive":
+					if value != "" {
+						options.ExcludeDirectives = append(options.ExcludeDirectives, value)
+					}
+				case "exclude_line_directive":
+					if value != "" {
+						options.ExcludeLineDirectives = append(options.ExcludeLineDirectives, value)
 					}
 				default:
 					return nil, fmt.Errorf("Invalid option: %v", key)

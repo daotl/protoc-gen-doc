@@ -84,3 +84,25 @@ message Booking {
     optional string optional_field_1 = 101; // An optional field to be used however you please.
   }
 }
+
+/**
+ * @skip
+ * This comment won't be rendered when using @skip directive
+ */
+message CustomExcludedMessage {
+  optional string id   = 1; // the id of this message.
+  optional string name = 2; // @skip this comment when using @skip directive
+
+  // Keep this comment
+  /* @skip this block comment when using @skip directive */
+  optional int32 value = 3;
+
+  // Keep this line
+  //buf:lint:ignore FIELD_COMMENT
+  optional int32 value1 = 4;
+
+  // @skip this paragraph when using @skip directive
+  // some more comments
+  /* Keep this new block */
+  optional int32 value2 = 5;
+}

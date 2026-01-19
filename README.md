@@ -128,6 +128,28 @@ Supported options in the second segment:
 
 - `exclude_patterns=...`: one or more comma-separated patterns to exclude.
 - `camel_case_fields=true|false`: emit field names in lowerCamelCase (default `false`).
+- `exclude_directive=...`: customize the paragraph/block exclusion directive (default `@exclude`). Can be repeated
+  to specify multiple directives.
+- `exclude_line_directive=...`: customize the line-level exclusion directive (default `@exclude-line`). Can be
+  repeated to specify multiple directives.
+
+**Customizing Exclusion Directives**
+
+By default, the plugin recognizes `@exclude` for paragraph/block exclusion and `@exclude-line` for line-level exclusion.
+You can customize these directives or add additional ones using the options:
+
+    # Use different directives
+    protoc --doc_out=./doc \
+      --doc_opt=html,index.html:exclude_directive=skip,exclude_line_directive=skip-line \
+      proto/*.proto
+
+    # Add multiple directives (e.g., ignore buf lint comments)
+    protoc --doc_out=./doc \
+      --doc_opt=html,index.html:exclude_line_directive=@exclude-line,exclude_line_directive=buf:lint:ignore \
+      proto/*.proto
+
+This allows you to integrate with other tools' comment directives. For example, you can configure the
+plugin to ignore comments from linters like `buf:lint:ignore`, `skipcq`, `nolint`, etc.
 
 For information about the available template arguments and functions, see [Custom Templates][custom]. If you just want
 to customize the look of the HTML output, put your CSS in `stylesheet.css` next to the output file and it will be picked
@@ -168,7 +190,8 @@ enum MyEnum {
 **Excluding comments**
 
 If you want to have some comment in your proto files, but don't want them to be part of the docs, you can use the
-`@exclude` and `@exclude-line` directives.
+`@exclude` and `@exclude-line` directives. These directives are customizable via the `exclude_directive` and
+`exclude_line_directive` options (see [Additional Options](#additional-options) for details).
 
 ### `@exclude` - Exclude entire paragraphs
 
