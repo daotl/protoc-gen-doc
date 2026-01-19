@@ -77,7 +77,7 @@ An empty message for testing
 
 |name | <<string,string>> | |
 
-|value | <<int32,int32>> | |
+|value | <<int32,int32>> | |Keep this comment
 
 |===========================================
 

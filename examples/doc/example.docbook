@@ -199,7 +199,7 @@
               <entry>value</entry>
               <entry><link linkend="int32">int32</link></entry>
               <entry></entry>
-              <entry><para></para></entry>
+              <entry><para>Keep this comment</para></entry>
             </row>
             
           </tbody>

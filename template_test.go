@@ -430,10 +430,23 @@ func TestExcludedComments(t *testing.T) {
 	message := findMessage("ExcludedMessage", vehicleFile)
 	require.Empty(t, message.Description)
 	require.Empty(t, findField("name", message).Description)
-	require.Empty(t, findField("value", message).Description)
+
+	// value: C-style block comment with @exclude acts as paragraph separator
+	// Comments before and after the block are preserved
+	require.Equal(t, "Keep this comment\nsome more comments 1\n\nKeep this comment also\nsome more comments 2",
+		findField("value", message).Description)
 
 	// just checking that it doesn't exclude everything
 	require.Equal(t, "the id of this message.", findField("id", message).Description)
+
+	// @exclude only works at paragraph/block level, not line level
+	// So this line with @exclude in the middle is preserved
+	require.Equal(t, "Keep this line\n@exclude won't exclude this line\nKeep this line also",
+		findField("value1", message).Description)
+
+	// Multi-block comment: first block kept, middle paragraph with @exclude excluded, last block kept
+	require.Equal(t, "Keep this block\nsome more comments 1\n\nKeep this new block\nsome more comments 1",
+		findField("value2", message).Description)
 }
 
 func findService(name string, f *File) *Service {

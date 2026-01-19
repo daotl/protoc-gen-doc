@@ -116,7 +116,7 @@ An empty message for testing
 | ----- | ---- | ----- | ----------- |
 | id | [string](#string) |  | the id of this message. |
 | name | [string](#string) |  |  |
-| value | [int32](#int32) |  |  |
+| value | [int32](#int32) |  | Keep this comment |
 
 
 

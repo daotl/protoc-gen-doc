@@ -28,7 +28,7 @@ func NewTemplate(descs []*protokit.FileDescriptor, pluginOptions *PluginOptions)
 	for _, f := range descs {
 		file := &File{
 			Name:          f.GetName(),
-			Description:   description(f.GetSyntaxComments().String()),
+			Description:   descriptionFromComment(f.GetSyntaxComments()),
 			Package:       f.GetPackage(),
 			HasEnums:      len(f.Enums) > 0,
 			HasExtensions: len(f.Extensions) > 0,
@@ -418,7 +418,7 @@ func parseEnum(pe *protokit.EnumDescriptor) *Enum {
 		Name:        pe.GetName(),
 		LongName:    pe.GetLongName(),
 		FullName:    pe.GetFullName(),
-		Description: description(pe.GetComments().String()),
+		Description: descriptionFromComment(pe.GetComments()),
 		Options: mergeOptions(extractOptions(pe.GetOptions()),
 			extensions.Transform(pe.OptionExtensions)),
 	}
@@ -427,7 +427,7 @@ func parseEnum(pe *protokit.EnumDescriptor) *Enum {
 		enum.Values = append(enum.Values, &EnumValue{
 			Name:        val.GetName(),
 			Number:      fmt.Sprint(val.GetNumber()),
-			Description: description(val.GetComments().String()),
+			Description: descriptionFromComment(val.GetComments()),
 			Options: mergeOptions(extractOptions(val.GetOptions()),
 				extensions.Transform(val.OptionExtensions)),
 		})
@@ -443,7 +443,7 @@ func parseFileExtension(pe *protokit.ExtensionDescriptor) *FileExtension {
 		Name:               pe.GetName(),
 		LongName:           pe.GetLongName(),
 		FullName:           pe.GetFullName(),
-		Description:        description(pe.GetComments().String()),
+		Description:        descriptionFromComment(pe.GetComments()),
 		Label:              labelName(pe.GetLabel(), pe.IsProto3(), pe.GetProto3Optional()),
 		Type:               t,
 		LongType:           lt,
@@ -461,7 +461,7 @@ func parseMessage(pm *protokit.Descriptor, pluginOptions *PluginOptions) *Messag
 		Name:          pm.GetName(),
 		LongName:      pm.GetLongName(),
 		FullName:      pm.GetFullName(),
-		Description:   description(pm.GetComments().String()),
+		Description:   descriptionFromComment(pm.GetComments()),
 		HasExtensions: len(pm.GetExtensions()) > 0,
 		HasFields:     len(pm.GetMessageFields()) > 0,
 		HasOneofs:     len(pm.GetOneofDecl()) > 0,
@@ -501,7 +501,7 @@ func parseMessageField(pf *protokit.FieldDescriptor, oneofDecls []*descriptor.On
 
 	m := &MessageField{
 		Name:         name,
-		Description:  description(pf.GetComments().String()),
+		Description:  descriptionFromComment(pf.GetComments()),
 		Label:        labelName(pf.GetLabel(), pf.IsProto3(), pf.GetProto3Optional()),
 		Type:         t,
 		LongType:     lt,
@@ -535,7 +535,7 @@ func parseService(ps *protokit.ServiceDescriptor) *Service {
 		Name:        ps.GetName(),
 		LongName:    ps.GetLongName(),
 		FullName:    ps.GetFullName(),
-		Description: description(ps.GetComments().String()),
+		Description: descriptionFromComment(ps.GetComments()),
 		Options: mergeOptions(extractOptions(ps.GetOptions()),
 			extensions.Transform(ps.OptionExtensions)),
 	}
@@ -550,7 +550,7 @@ func parseService(ps *protokit.ServiceDescriptor) *Service {
 func parseServiceMethod(pm *protokit.MethodDescriptor) *ServiceMethod {
 	return &ServiceMethod{
 		Name:              pm.GetName(),
-		Description:       description(pm.GetComments().String()),
+		Description:       descriptionFromComment(pm.GetComments()),
 		RequestType:       baseName(pm.GetInputType()),
 		RequestLongType:   strings.TrimPrefix(pm.GetInputType(), "."+pm.GetPackage()+"."),
 		RequestFullType:   strings.TrimPrefix(pm.GetInputType(), "."),
@@ -595,13 +595,105 @@ func parseType(tc typeContainer) (string, string, string) {
 	return name, name, name
 }
 
-func description(comment string) string {
-	val := strings.TrimLeft(comment, "*/\n ")
-	if strings.HasPrefix(val, "@exclude") {
+func descriptionFromComment(comment *protokit.Comment) string {
+	if comment == nil {
 		return ""
 	}
 
-	return val
+	// Prefer leading comments (no blank line) over detached comments (blank line),
+	// so that /* @exclude ... */ directives in leading comments are stripped
+	// while the documentation is preserved.
+	val := strings.TrimLeft(comment.String(), "*/\n ")
+	keptParagraphs := make([]string, 0)
+	if val != "" {
+		// If the overall comment starts with @exclude, skip to detached comments.
+		if !strings.HasPrefix(strings.TrimLeft(val, "*/\n "), "@exclude") {
+			// Process line by line, treating C-style block comments with @exclude as paragraph separators
+			lines := strings.Split(val, "\n")
+			currentParagraph := make([]string, 0, len(lines))
+
+			for _, line := range lines {
+				trimmed := strings.TrimLeft(line, "*/\n ")
+				if strings.TrimSpace(trimmed) == "" {
+					// Empty line - finalize current paragraph if any
+					if len(currentParagraph) > 0 {
+						keptParagraphs = append(keptParagraphs, strings.Join(currentParagraph, "\n"))
+						currentParagraph = make([]string, 0, len(lines))
+					}
+					continue
+				}
+
+				// Check if this is a C-style block comment with @exclude
+				// After trimming, "/* @exclude ... */" becomes "@exclude ... */"
+				if strings.Contains(trimmed, "@exclude") && strings.Contains(trimmed, "*/") {
+					// This acts as a paragraph separator - finalize current paragraph if any
+					if len(currentParagraph) > 0 {
+						keptParagraphs = append(keptParagraphs, strings.Join(currentParagraph, "\n"))
+						currentParagraph = make([]string, 0, len(lines))
+					}
+					// Don't add this line to the new paragraph
+					continue
+				}
+
+				currentParagraph = append(currentParagraph, strings.TrimSpace(trimmed))
+			}
+
+			// Add the last paragraph if any
+			if len(currentParagraph) > 0 {
+				keptParagraphs = append(keptParagraphs, strings.Join(currentParagraph, "\n"))
+			}
+		}
+	}
+
+	// Also process detached comments (excluding those with @exclude)
+	// and combine them with leading comments
+	detachedParagraphs := make([]string, 0)
+	if len(comment.GetDetached()) > 0 {
+		for _, detached := range comment.GetDetached() {
+			val := strings.TrimLeft(detached, "*/\n ")
+			if val == "" {
+				continue
+			}
+			// Drop detached chunks that explicitly start with @exclude.
+			if strings.HasPrefix(val, "@exclude") {
+				continue
+			}
+			// Drop detached chunks that contain C-style block comments with @exclude
+			if strings.Contains(val, "@exclude") && strings.Contains(val, "*/") {
+				// Split by the @exclude block and keep the parts before/after
+				lines := strings.Split(val, "\n")
+				for _, line := range lines {
+					trimmed := strings.TrimLeft(line, "*/\n ")
+					if strings.TrimSpace(trimmed) == "" {
+						continue
+					}
+					if strings.Contains(trimmed, "@exclude") && strings.Contains(trimmed, "*/") {
+						continue
+					}
+					detachedParagraphs = append(detachedParagraphs, trimmed)
+				}
+				continue
+			}
+			detachedParagraphs = append(detachedParagraphs, val)
+		}
+	}
+
+	// Combine leading and detached comments
+	// If there are no leading paragraphs, use detached only
+	if len(keptParagraphs) == 0 && len(detachedParagraphs) > 0 {
+		return strings.Join(detachedParagraphs, "\n")
+	}
+	// If there are both, combine them
+	if len(keptParagraphs) > 0 && len(detachedParagraphs) > 0 {
+		allParagraphs := append(detachedParagraphs, keptParagraphs...)
+		return strings.Join(allParagraphs, "\n\n")
+	}
+	// If there are only leading paragraphs
+	if len(keptParagraphs) > 0 {
+		return strings.Join(keptParagraphs, "\n\n")
+	}
+
+	return ""
 }
 
 type orderedEnums []*Enum

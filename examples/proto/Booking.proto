@@ -71,8 +71,9 @@ service BookingService {
  */
 message ExcludedMessage {
   string id   = 1; // the id of this message.
-  string name = 2; // @exclude the name of this message
+  string name = 2; // @exclude this comment
 
-  /* @exclude the value of this message. */
+  // Keep this comment
+  /* @exclude this comment */
   int32 value = 3;
 }

@@ -61,10 +61,31 @@ message EmptyMessage {
  */
 message ExcludedMessage {
   string id   = 1; // the id of this message.
-  string name = 2; // @exclude the name of this message
+  string name = 2; // @exclude this comment
 
-  /* @exclude the value of this message. */
+  // Keep this comment
+  // some more comments 1
+  /* @exclude this comment
+     some more comments
+  */
+  // Keep this comment also
+  // some more comments 2
   int32 value = 3;
+
+  // Keep this line
+  // @exclude won't exclude this line
+  // Keep this line also
+  int32 value1 = 4;
+
+  /* Keep this block
+     some more comments 1
+  */
+  // @exclude this block
+  // some more comments
+  /* Keep this new block
+     some more comments 1
+  */
+  int32 value2 = 5;
 }
 
 // The type of model.
